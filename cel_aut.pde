@@ -10,7 +10,7 @@
  */
 
 // Size of cells
-int cellSize = 6; // originally 5
+int cellSize = 8;
 
 // How likely for a cell to be alive at start (in percentage)
 float probabilityOfAliveAtStart = 20; // originally 15
@@ -20,7 +20,7 @@ int interval = 100;
 int lastRecordedTime = 0;
 
 // temperature decrease each tick
-int decreaseAmount = 30;
+int decreaseAmount = 25;
 
 // Array of cells
 int[][] cells; 
@@ -92,31 +92,31 @@ void draw() {
   }
 
   // Create  new cells manually on pause
-  //if (pause && mousePressed) {
-  //  // Map and avoid out of bound errors
-  //  int xCellOver = int(map(mouseX, 0, width, 0, width/cellSize));
-  //  xCellOver = constrain(xCellOver, 0, width/cellSize-1);
-  //  int yCellOver = int(map(mouseY, 0, height, 0, height/cellSize));
-  //  yCellOver = constrain(yCellOver, 0, height/cellSize-1);
+  if (pause && mousePressed) {
+   // Map and avoid out of bound errors
+   int xCellOver = int(map(mouseX, 0, width, 0, width/cellSize));
+   xCellOver = constrain(xCellOver, 0, width/cellSize-1);
+   int yCellOver = int(map(mouseY, 0, height, 0, height/cellSize));
+   yCellOver = constrain(yCellOver, 0, height/cellSize-1);
 
-  //  // Check against cells in buffer
-  //  if (cellsBuffer[xCellOver][yCellOver]==1) { // Cell is alive
-  //    cells[xCellOver][yCellOver]=0; // Kill
-  //    fill(dead); // Fill with kill color
-  //  }
-  //  else { // Cell is dead
-  //    cells[xCellOver][yCellOver]=1; // Make alive
-  //    fill(alive); // Fill alive color
-  //  }
-  //} 
-  //else if (pause && !mousePressed) { // And then save to buffer once mouse goes up
-  //  // Save cells to buffer (so we opeate with one array keeping the other intact)
-  //  for (int x=0; x<width/cellSize; x++) {
-  //    for (int y=0; y<height/cellSize; y++) {
-  //      cellsBuffer[x][y] = cells[x][y];
-  //    }
-  //  }
-  //}
+   // Check against cells in buffer
+   if (cellsBuffer[xCellOver][yCellOver]==1) { // Cell is alive
+     cells[xCellOver][yCellOver]=0; // Kill
+     fill(color(0, 0, 0)); // Fill with kill color
+   }
+   else { // Cell is dead
+     cells[xCellOver][yCellOver]=255; // Make alive
+     fill(color(255, 255, 255)); // Fill alive color
+   }
+  } 
+  else if (pause && !mousePressed) { // And then save to buffer once mouse goes up
+   // Save cells to buffer (so we opeate with one array keeping the other intact)
+   for (int x=0; x<width/cellSize; x++) {
+     for (int y=0; y<height/cellSize; y++) {
+       cellsBuffer[x][y] = cells[x][y];
+     }
+   }
+  }
   
 }
 
@@ -180,7 +180,7 @@ void keyPressed() {
           temperature = 0;
         }
         else {
-          temperature = 1;
+          temperature = 255;
         }
         cells[x][y] = int(temperature); // Save temperature of each cell
       }
