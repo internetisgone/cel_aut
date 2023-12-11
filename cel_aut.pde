@@ -19,6 +19,9 @@ float probabilityOfAliveAtStart = 20; // originally 15
 int interval = 100;
 int lastRecordedTime = 0;
 
+// temperature decrease each tick
+int decreaseAmount = 30;
+
 // Array of cells
 int[][] cells; 
 // Buffer to record the temperature of the cells and use this 
@@ -124,8 +127,6 @@ void iteration() { // When the clock ticks
       cellsBuffer[x][y] = cells[x][y];
     }
   }
-
-  // TODO inactive cells gradually die
   
   // Visit each cell:
   for (int x=0; x<width/cellSize; x++) {
@@ -156,8 +157,13 @@ void iteration() { // When the clock ticks
       } // End of if
       
       // dead cell fades away
-      if (cells[x][y] < 255 && cells[x][y] > 50) {
-        cells[x][y] -= 50;
+      if (cells[x][y] < 255) {
+        if (cells[x][y] - decreaseAmount < 0) {
+          cells[x][y] = 0;
+        }
+        else {
+          cells[x][y] -= decreaseAmount;
+        }     
       }
       
     } // End of y loop
