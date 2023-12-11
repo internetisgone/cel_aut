@@ -10,69 +10,73 @@
  */
 
 // Size of cells
-int cellSize = 5;
+int cellSize = 6; // originally 5
 
 // How likely for a cell to be alive at start (in percentage)
-float probabilityOfAliveAtStart = 15;
+float probabilityOfAliveAtStart = 20; // originally 15
 
 // Variables for timer
 int interval = 100;
 int lastRecordedTime = 0;
 
-// Colors for active/inactive cells
-color alive = color(0, 200, 0);
-color dead = color(0);
-
 // Array of cells
 int[][] cells; 
-// Buffer to record the state of the cells and use this 
+// Buffer to record the temperature of the cells and use this 
 // while changing the others in the interations
 int[][] cellsBuffer; 
 
 // Pause
 boolean pause = false;
 
+// background image 
+PImage img;
+
+boolean bgInited = false;
+
 void setup() {
-  size (640, 360);
+  size (900, 750);
 
   // Instantiate arrays 
   cells = new int[width/cellSize][height/cellSize];
   cellsBuffer = new int[width/cellSize][height/cellSize];
 
   // This stroke will draw the background grid
-  stroke(48);
+  //stroke(48);
 
   noSmooth();
 
   // Initialization of cells
   for (int x=0; x<width/cellSize; x++) {
     for (int y=0; y<height/cellSize; y++) {
-      float state = random (100);
-      if (state > probabilityOfAliveAtStart) { 
-        state = 0;
+      float temperature = random (100);
+      if (temperature > probabilityOfAliveAtStart) { 
+        temperature = 0;
       }
       else {
-        state = 1;
+        temperature = 255;
       }
-      cells[x][y] = int(state); // Save state of each cell
+      cells[x][y] = int(temperature); // Save temperature of each cell
     }
   }
+  
   // Fill in black in case cells don't cover all the windows
   background(0); 
+  // img = loadImage("waves.png");
 }
 
 
 void draw() {
-
+  // if (bgInited == false) {
+  //   image(img, 0, 0, 900, 750); // 6:5
+  //   bgInited = true;
+  //   blendMode(SCREEN);
+  // }
+  
   //Draw grid
   for (int x=0; x<width/cellSize; x++) {
     for (int y=0; y<height/cellSize; y++) {
-      if (cells[x][y]==1) {
-        fill(alive); // If alive
-      }
-      else {
-        fill(dead); // If dead
-      }
+      int temperature = cells[x][y];
+      fill(color(temperature, temperature, temperature)); 
       rect (x*cellSize, y*cellSize, cellSize, cellSize);
     }
   }
@@ -85,31 +89,32 @@ void draw() {
   }
 
   // Create  new cells manually on pause
-  if (pause && mousePressed) {
-    // Map and avoid out of bound errors
-    int xCellOver = int(map(mouseX, 0, width, 0, width/cellSize));
-    xCellOver = constrain(xCellOver, 0, width/cellSize-1);
-    int yCellOver = int(map(mouseY, 0, height, 0, height/cellSize));
-    yCellOver = constrain(yCellOver, 0, height/cellSize-1);
+  //if (pause && mousePressed) {
+  //  // Map and avoid out of bound errors
+  //  int xCellOver = int(map(mouseX, 0, width, 0, width/cellSize));
+  //  xCellOver = constrain(xCellOver, 0, width/cellSize-1);
+  //  int yCellOver = int(map(mouseY, 0, height, 0, height/cellSize));
+  //  yCellOver = constrain(yCellOver, 0, height/cellSize-1);
 
-    // Check against cells in buffer
-    if (cellsBuffer[xCellOver][yCellOver]==1) { // Cell is alive
-      cells[xCellOver][yCellOver]=0; // Kill
-      fill(dead); // Fill with kill color
-    }
-    else { // Cell is dead
-      cells[xCellOver][yCellOver]=1; // Make alive
-      fill(alive); // Fill alive color
-    }
-  } 
-  else if (pause && !mousePressed) { // And then save to buffer once mouse goes up
-    // Save cells to buffer (so we opeate with one array keeping the other intact)
-    for (int x=0; x<width/cellSize; x++) {
-      for (int y=0; y<height/cellSize; y++) {
-        cellsBuffer[x][y] = cells[x][y];
-      }
-    }
-  }
+  //  // Check against cells in buffer
+  //  if (cellsBuffer[xCellOver][yCellOver]==1) { // Cell is alive
+  //    cells[xCellOver][yCellOver]=0; // Kill
+  //    fill(dead); // Fill with kill color
+  //  }
+  //  else { // Cell is dead
+  //    cells[xCellOver][yCellOver]=1; // Make alive
+  //    fill(alive); // Fill alive color
+  //  }
+  //} 
+  //else if (pause && !mousePressed) { // And then save to buffer once mouse goes up
+  //  // Save cells to buffer (so we opeate with one array keeping the other intact)
+  //  for (int x=0; x<width/cellSize; x++) {
+  //    for (int y=0; y<height/cellSize; y++) {
+  //      cellsBuffer[x][y] = cells[x][y];
+  //    }
+  //  }
+  //}
+  
 }
 
 void iteration() { // When the clock ticks
@@ -120,6 +125,8 @@ void iteration() { // When the clock ticks
     }
   }
 
+  // TODO inactive cells gradually die
+  
   // Visit each cell:
   for (int x=0; x<width/cellSize; x++) {
     for (int y=0; y<height/cellSize; y++) {
@@ -129,7 +136,7 @@ void iteration() { // When the clock ticks
         for (int yy=y-1; yy<=y+1;yy++) {  
           if (((xx>=0)&&(xx<width/cellSize))&&((yy>=0)&&(yy<height/cellSize))) { // Make sure you are not out of bounds
             if (!((xx==x)&&(yy==y))) { // Make sure to to check against self
-              if (cellsBuffer[xx][yy]==1){
+              if (cellsBuffer[xx][yy]==255){
                 neighbours ++; // Check alive neighbours and count them
               }
             } // End of if
@@ -137,16 +144,22 @@ void iteration() { // When the clock ticks
         } // End of yy loop
       } //End of xx loop
       // We've checked the neigbours: apply rules!
-      if (cellsBuffer[x][y]==1) { // The cell is alive: kill it if necessary
+      if (cellsBuffer[x][y]==255) { // The cell is alive: kill it if necessary
         if (neighbours < 2 || neighbours > 3) {
-          cells[x][y] = 0; // Die unless it has 2 or 3 neighbours
+          cells[x][y] = cellsBuffer[x][y] - 50; // Die unless it has 2 or 3 neighbours
         }
       } 
       else { // The cell is dead: make it live if necessary      
         if (neighbours == 3 ) {
-          cells[x][y] = 1; // Only if it has 3 neighbours
+          cells[x][y] = 255; // Only if it has 3 neighbours
         }
       } // End of if
+      
+      // dead cell fades away
+      if (cells[x][y] < 255 && cells[x][y] > 50) {
+        cells[x][y] -= 50;
+      }
+      
     } // End of y loop
   } // End of x loop
 } // End of function
@@ -156,14 +169,14 @@ void keyPressed() {
     // Restart: reinitialization of cells
     for (int x=0; x<width/cellSize; x++) {
       for (int y=0; y<height/cellSize; y++) {
-        float state = random (100);
-        if (state > probabilityOfAliveAtStart) {
-          state = 0;
+        float temperature = random (100);
+        if (temperature > probabilityOfAliveAtStart) {
+          temperature = 0;
         }
         else {
-          state = 1;
+          temperature = 1;
         }
-        cells[x][y] = int(state); // Save state of each cell
+        cells[x][y] = int(temperature); // Save temperature of each cell
       }
     }
   }
