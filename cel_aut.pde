@@ -1,6 +1,7 @@
 /**
  * Game of Life
  * by Joan Soler-Adillon.
+ * Modified by github.com/internetisgone
  *
  * Press SPACE BAR to pause and change the cell's values 
  * with the mouse. On pause, click to activate/deactivate 
@@ -10,10 +11,10 @@
  */
 
 // Size of cells
-int cellSize = 8;
+int cellSize = 15;
 
 // How likely for a cell to be alive at start (in percentage)
-float probabilityOfAliveAtStart = 20; // originally 15
+float probabilityOfAliveAtStart = 20; 
 
 // Variables for timer
 int interval = 100;
@@ -37,7 +38,7 @@ PImage img;
 boolean bgInited = false;
 
 void setup() {
-  size (900, 750);
+  size (750, 900);
 
   // Instantiate arrays 
   cells = new int[width/cellSize][height/cellSize];
@@ -69,10 +70,11 @@ void setup() {
 
 
 void draw() {
-  // if (bgInited == false) {
-  //   image(img, 0, 0, 900, 750); // 6:5
+  // blendMode(SCREEN);
+
+  // if (!bgInited) {
+  //   image(img, 0, 0, 750, 900); 
   //   bgInited = true;
-  //   blendMode(SCREEN);
   // }
   
   //Draw grid
